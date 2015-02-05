@@ -85,6 +85,5 @@ else {
         console.log("JSON saved to " + outputFileName);
       }
     });
-
   }
 }
