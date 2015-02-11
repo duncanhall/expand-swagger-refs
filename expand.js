@@ -1,89 +1,116 @@
 
 var inputFileName = process.argv[2];
+var inputSchema;
+var targetSchema;
 
 if (inputFileName === undefined) {
   console.log('Error: You must specify a swagger file as an input.');
   process.exit(1);
 }
 else {
-  var inputSchema = require(inputFileName);
 
-  if (inputSchema.paths !== undefined) {
+  inputSchema = require(inputFileName);
+  targetSchema = cloneSchema(inputSchema);
 
-    var targetSchema = clone(inputSchema);
+  expandReferences(targetSchema, '');
+  writeSchemaToFile(targetSchema);
+}
 
-    //All the operations we should expand parameters for
-    var allowedOperations = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'];
-    var ops = allowedOperations.length;
+/**
+ * Traverses the entire target schema looking for $refs, expanded them as it goes.
+ *
+ * @param parent {object} The object in which to look for $refs
+ * @param loc {string} The current dot-notation location is relation to the parent.
+ */
+function expandReferences(parent, loc) {
+  for (var child in parent) {
 
-    /**
-     * Get the top level parameter object by it's $ref
-     *
-     * @param reference {string} The fully qualified reference path.
-     * @returns {object} The parameter object
-     */
-    function getTopLevelParameter (reference) {
-      var localReference = reference.substr('#/parameters/'.length);
-      return inputSchema.parameters[localReference];
-    }
+    if (parent.hasOwnProperty(child)) {
+      if (child === '$ref') {
 
-    /**
-     * Sloppy copy of the JSON schema.
-     *
-     * @param input {object} The object to copy
-     * @returns {object} The copied object
-     */
-    function clone(input) {
-      return JSON.parse(JSON.stringify(input));
-    }
+        //We found a $reference
+        expand(loc, parent[child]);
+      }
+      else if (typeof parent[child] === 'object') {
 
-    //Traverse schema and look for references to expand
-    for (var path in inputSchema.paths) {
-      if (inputSchema.paths.hasOwnProperty(path)) {
-
-        var operation;
-        var pathOperation;
-
-        for (var i = 0; i < ops; i++) {
-
-          //Checking for any operations on this path
-          operation = allowedOperations[i];
-          pathOperation = inputSchema.paths[path][operation];
-
-          if (pathOperation !== undefined) {
-
-            //Found an operation, check for parameters
-            var operationParameters = pathOperation.parameters;
-            if (operationParameters !== undefined) {
-
-                //Check parameter list for $refs
-                var numParams = operationParameters.length;
-                var parameterRef;
-                for (var j = 0; j < numParams; j++) {
-
-                  parameterRef = operationParameters[j].$ref;
-                  if (parameterRef !== undefined) {
-
-                    //Found a $ref, overwrite it in the target with the expanded param
-                    targetSchema.paths[path][operation].parameters[j] = getTopLevelParameter(parameterRef);
-                  }
-                }
-            }
-          }
-        }
+        //Check the child object for $refs. Go deep man.
+        expandReferences(parent[child], loc + '.' + child);
       }
     }
-
-    var fs = require('fs');
-    var fileName = inputFileName.substr(0, inputFileName.indexOf('json') - 1);
-    var outputFileName = fileName + '-expanded.json';
-
-    fs.writeFile(outputFileName, JSON.stringify(targetSchema, null, 4), function(err) {
-      if(err) {
-        console.log(err);
-      } else {
-        console.log("JSON saved to " + outputFileName);
-      }
-    });
   }
+}
+
+/**
+ * Sets the value at a given path to the real value of its reference.
+ *
+ * @param target
+ * @param valueReference
+ */
+function expand(target, valueReference) {
+
+  var targetPath = target.substr(1);
+  var value = getReferenceValue(valueReference);
+
+  setValueAtPath(targetSchema, value, targetPath);
+}
+
+
+/**
+ * Set the value of a nested property given it's dot-notation path
+ *
+ * @param obj
+ * @param value
+ * @param path
+ */
+function setValueAtPath(obj, value, path) {
+
+  path = path.split('.');
+  for (i = 0; i < path.length - 1; i++) obj = obj[path[i]];
+  obj[path[i]] = value;
+}
+
+
+/**
+ * Sloppy copy of the JSON schema.
+ *
+ * @param input {object} The object to copy
+ * @returns {object} The copied object
+ */
+function cloneSchema(input) {
+  return JSON.parse(JSON.stringify(input));
+}
+
+
+/**
+ * Get the top level reference value
+ *
+ */
+function getReferenceValue (reference) {
+
+  var components = reference.split('/');
+  var type = components[1];
+  var localName = components[components.length - 1];
+
+  return targetSchema[type][localName];
+}
+
+
+/**
+ * Saves a schema object to a JSON file
+ *
+ * @param targetSchema
+ */
+function writeSchemaToFile (targetSchema) {
+
+  var fs = require('fs');
+  var fileName = inputFileName.substr(0, inputFileName.indexOf('json') - 1);
+  var outputFileName = fileName + '-expanded.json';
+
+  fs.writeFile(outputFileName, JSON.stringify(targetSchema, null, 4), function(err) {
+    if(err) {
+      console.log(err);
+    } else {
+      console.log("JSON saved to " + outputFileName);
+    }
+  });
 }
