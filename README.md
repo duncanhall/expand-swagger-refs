@@ -1,9 +1,9 @@
 # expand-swagger-refs
-Convert swagger parameter $refs to expanded parameters
+Automatically expand all `$ref` values in your Swagger schema.
 
-With the release of Swagger 2.0 there are still some issues with expanding `$ref` values in operation parameters (notably, with Swagger UI - https://github.com/swagger-api/swagger-ui/issues/621).
+With the release of Swagger 2.0 there are still some issues with expanding `$ref` values in various places (notably, with Swagger UI - https://github.com/swagger-api/swagger-ui/issues/621).
 
-This tool provides a simple (read quick and dirty) method for automatically expanding those parameters in your Swagger schema, until the problem is fixed.
+This tool will output a copy of a given schema, recursively expanding any and all `$ref` values it finds.
 
 ### Installation
 As the issue will hopefully be resolved soon, installation is simply via a clone of this repo:
