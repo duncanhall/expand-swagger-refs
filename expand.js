@@ -1,13 +1,17 @@
+'use strict';
 
 var inputFileName = process.argv[2];
 var inputSchema;
 var targetSchema;
+var targetReferenceTypes = [];
 
 if (inputFileName === undefined) {
   console.log('Error: You must specify a swagger file as an input.');
   process.exit(1);
 }
 else {
+
+  targetReferenceTypes = process.argv.slice(3);
 
   inputSchema = require(inputFileName);
   targetSchema = cloneSchema(inputSchema);
@@ -26,7 +30,7 @@ function expandReferences(parent, loc) {
   for (var child in parent) {
 
     if (parent.hasOwnProperty(child)) {
-      if (child === '$ref') {
+      if (child === '$ref' && userWantsExpansion(parent[child])) {
 
         //We found a $reference
         expand(loc, parent[child]);
@@ -65,7 +69,7 @@ function expand(target, valueReference) {
 function setValueAtPath(obj, value, path) {
 
   path = path.split('.');
-  for (i = 0; i < path.length - 1; i++) obj = obj[path[i]];
+  for (var i = 0; i < path.length - 1; i++) obj = obj[path[i]];
   obj[path[i]] = value;
 }
 
@@ -87,11 +91,36 @@ function cloneSchema(input) {
  */
 function getReferenceValue (reference) {
 
-  var components = reference.split('/');
-  var type = components[1];
-  var localName = components[components.length - 1];
+  var meta = getReferenceMeta(reference);
+  return targetSchema[meta.type][meta.localName];
+}
 
-  return targetSchema[type][localName];
+/**
+ * Parses a $ref value into its type and localName
+ * @param reference
+ * @returns {{type: *, localName: *}}
+ */
+function getReferenceMeta (reference) {
+
+  var components = reference.split('/');
+  return {type:components[1], localName:components[components.length - 1]};
+}
+
+/**
+ * A $ref address to check for
+ *
+ * @param reference
+ * @returns {boolean}
+ */
+function userWantsExpansion (reference) {
+
+  if (targetReferenceTypes.length === 0) {
+    return true;
+  }
+  else {
+    var meta = getReferenceMeta(reference);
+    return targetReferenceTypes.indexOf(meta.type) !== -1;
+  }
 }
 
 
