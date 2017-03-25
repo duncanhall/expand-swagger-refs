@@ -5,6 +5,7 @@ var inputSchema;
 var targetSchema;
 var targetReferenceTypes = [];
 
+/*
 if (inputFileName === undefined) {
   console.log('Error: You must specify a swagger file as an input.');
   process.exit(1);
@@ -19,6 +20,16 @@ else {
   expandReferences(targetSchema, '');
   writeSchemaToFile(targetSchema);
 }
+*/
+
+function expandSchema(input) {
+  targetSchema = cloneSchema(input);
+  expandReferences(targetSchema, '');
+  return targetSchema;
+};
+
+
+module.exports = { expandSchema };
 
 /**
  * Traverses the entire target schema looking for $refs, expanded them as it goes.
