@@ -10,7 +10,7 @@ describe('Expand Swagger Refs', function() {
   
   testData.forEach(test => {
     it(test.title, () => {
-      const result = expandRefs.inline(test.input);
+      const result = expandRefs.expanded(test.input);
       assert.deepEqual(result, test.output)
     })
   })

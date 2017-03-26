@@ -1,60 +1,33 @@
 'use strict';
 
-let output;
-let refs; 
-
-function inline(input) {
-  refs = {};
-  output = Object.assign({}, input);
-  expandReferences(output);
-  return output;
+function expanded(input) {
+  return expand(Object.assign({}, input));
 };
 
-function expandReferences(parent, currentPath) {
-  currentPath = currentPath || '';
-
-  for (var child in parent) {
-    if (parent.hasOwnProperty(child)) {
-      if (child === '$ref') {
-        //We found a $reference
-        expand(currentPath, parent[child]);
-      }
-      else if (typeof parent[child] === 'object') {
-        //Check the child object for $refs. Go deep man.
-        expandReferences(parent[child], currentPath + '.' + child);
-      }
+function expand(source, current = null, cache = {}) {
+  current = current || source;
+  Object.keys(current).forEach(child => {
+    if (child === '$ref') {
+      Object.assign(current, getReferenceValue(source, current[child], cache));
+      delete current.$ref;
     }
-  }
+    else if (typeof current[child] === 'object') {
+      expand(source, current[child], cache);
+    }
+  });
+  return source;
 }
 
-/**
- * Sets the value of srcPath to the value of refName
- */
-function expand(srcPath, refName) {
-  const value = getReferenceValue(refName);
-  const [head, ...targetPath] = srcPath.split('.');
-  targetPath.reduce((parent, key, i) => {
-    if (i === targetPath.length - 1) {
-      parent[key] = value;
-    } else {
-      return parent[key];
-    }
-  }, output)
-}
-
-/**
- * Memoized lookup for retrieving ref values by name
- */
-function getReferenceValue(refName) {
-  if (refs.hasOwnProperty(refName)) {
-    return refs[refName];
+function getReferenceValue(source, refName, cache) {
+  if (cache.hasOwnProperty(refName)) {
+    return cache[refName];
   } else {
     const [ref, ...valuePath] = refName.split('/');
-    const value = valuePath.reduce((parent, key) => parent[key], output);
-    refs[refName] = value;
+    const value = valuePath.reduce((parent, key) => parent[key], source);
+    cache[refName] = value;
     return value;
   }
 }
 
-module.exports = { inline };
+module.exports = { expand, expanded };
 
