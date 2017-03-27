@@ -1,30 +1,52 @@
 'use strict';
 
+/**
+ * Return a copy of the input with $ref values expanded.
+ *
+ * @param input {object}  A Swagger schema object
+ * @returns     {object}  A copy of the input with $ref values expanded
+ */
 function expanded(input) {
   return expand(Object.assign({}, input));
 };
 
-function expand(source, current = null, cache = {}) {
-  current = current || source;
+/**
+ * Expands a schema in-place (mutates the input).
+ *
+ * @param input   {object}  A Swagger schema object
+ * @param current {object}  The schema property to expand
+ * @param cache   {object}  Map of $ref values
+ * @returns       {object}  The original input, with $ref values expanded
+ */
+function expand(input, current = null, cache = {}) {
+  current = current || input;
   Object.keys(current).forEach(child => {
     if (child === '$ref') {
-      Object.assign(current, getReferenceValue(source, current[child], cache));
+      Object.assign(current, getReferenceValue(input, current[child], cache));
       delete current.$ref;
     }
     else if (typeof current[child] === 'object') {
-      expand(source, current[child], cache);
+      expand(input, current[child], cache);
     }
   });
-  return source;
+  return input;
 }
 
-function getReferenceValue(source, refName, cache) {
-  if (cache.hasOwnProperty(refName)) {
-    return cache[refName];
+/**
+ * Memoized lookup of $ref values by name.
+ *
+ * @param input {object}  A Swagger schema object
+ * @param name  {String}  The reference name to lookup
+ * @param cache {object}  Map of cached $ref values
+ * @returns     {object}  The value of the named $ref   
+ */
+function getReferenceValue(input, name, cache) {
+  if (cache.hasOwnProperty(name)) {
+    return cache[name];
   } else {
-    const [ref, ...valuePath] = refName.split('/');
-    const value = valuePath.reduce((parent, key) => parent[key], source);
-    cache[refName] = value;
+    const [ref, ...valuePath] = name.split('/');
+    const value = valuePath.reduce((parent, key) => parent[key], input);
+    cache[name] = value;
     return value;
   }
 }
