@@ -1,0 +1,84 @@
+{
+  "swagger":"2.0",
+  "info":{
+    "version":"1.0.0",
+    "title":"Foo"
+  },
+  "paths":{
+    "\/foo":{
+      "get":{
+        "parameters":[
+
+        ],
+        "responses":{
+          "200":{
+            "$ref":"#\/responses\/bar"
+          }
+        },
+        "x-amazon-apigateway-integration":{
+          "type":"mock",
+          "responses":{
+            "default":{
+              "statusCode":200
+            }
+          },
+          "requestTemplates":{
+            "application\/json":"{\"statusCode\" : 200}"
+          },
+          "passthroughBehavior":"when_no_match"
+        }
+      },
+      "post":{
+        "parameters":[
+
+        ],
+        "responses":{
+          "200":{
+            "$ref":"#\/responses\/bar"
+          }
+        },
+        "x-amazon-apigateway-integration":{
+          "type":"mock",
+          "responses":{
+            "default":{
+              "statusCode":200
+            }
+          },
+          "requestTemplates":{
+            "application\/json":"{\"statusCode\" : 200}"
+          },
+          "passthroughBehavior":"when_no_match"
+        }
+      }
+    },
+    "\/bar":{
+      "get":{
+        "parameters":[
+
+        ],
+        "responses":{
+          "200":{
+            "$ref":"#\/responses\/bar"
+          }
+        },
+        "x-amazon-apigateway-integration":{
+          "type":"mock",
+          "responses":{
+            "default":{
+              "statusCode":200
+            }
+          },
+          "requestTemplates":{
+            "application\/json":"{\"statusCode\" : 200}"
+          },
+          "passthroughBehavior":"when_no_match"
+        }
+      }
+    }
+  },
+  "responses":{
+    "bar":{
+      "description":"A nice description"
+    }
+  }
+}
