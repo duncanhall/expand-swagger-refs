@@ -12,15 +12,25 @@ if (inputFile === undefined) {
   return process.exit(1);
 }
 
-fs.access(inputFile, fs.constants.R_OK, (error) => {
+const overwrite = args.includes('-o');
+let permissions = fs.constants.R_OK;
+
+if (overwrite) permissions |= fs.constants.W_OK;
+
+fs.access(inputFile, permissions, (error) => {
   if (error) {
-    console.error(`Could not read file '${error.path}'. If the file exists, check you have permission to read it.`);
+    console.error(`Could not open file '${error.path}'. If the file exists, check you have the required permissions.`);
     return process.exit(2);
   } else {
-    const ext = path.extname(inputFile);
-    const basename = path.basename(inputFile, ext);
-    const outputFile = path.join(path.dirname(inputFile), `${basename}-expanded${ext}`);
-    expandFile(inputFile, outputFile)
+
+    if (overwrite) {
+      expandFile(inputFile, inputFile)
+    } else {
+      const ext = path.extname(inputFile);
+      const basename = path.basename(inputFile, ext);
+      const outputFile = path.join(path.dirname(inputFile), `${basename}-expanded${ext}`);
+      expandFile(inputFile, outputFile)
+    }
   }
 });
 
