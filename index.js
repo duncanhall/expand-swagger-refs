@@ -3,8 +3,8 @@
 /**
  * Return a copy of the input with $ref values expanded.
  *
- * @param input {object}  A Swagger schema object
- * @returns     {object}  A copy of the input with $ref values expanded
+ * @param   {object} input  A Swagger schema object
+ * @returns {object}        A copy of the input with $ref values expanded
  */
 function expanded(input) {
   return expand(Object.assign({}, input));
@@ -13,10 +13,10 @@ function expanded(input) {
 /**
  * Expands a schema in-place (mutates the input).
  *
- * @param input   {object}  A Swagger schema object
- * @param current {object}  The schema property to expand
- * @param cache   {object}  Map of $ref values
- * @returns       {object}  The original input, with $ref values expanded
+ * @param   {object} input    A Swagger schema object
+ * @param   {object} current  The schema property to expand
+ * @param   {object} cache    Map of $ref values
+ * @returns {object}          The original input, with $ref values expanded
  */
 function expand(input, current = null, cache = {}) {
   current = current || input;
@@ -35,10 +35,10 @@ function expand(input, current = null, cache = {}) {
 /**
  * Memoized lookup of $ref values by name.
  *
- * @param input {object}  A Swagger schema object
- * @param name  {String}  The reference name to lookup
- * @param cache {object}  Map of cached $ref values
- * @returns     {object}  The value of the named $ref   
+ * @param   {object} input  A Swagger schema object
+ * @param   {String} name   The reference name to lookup
+ * @param   {object} cache  Map of cached $ref values
+ * @returns {object}        The value of the named $ref   
  */
 function getReferenceValue(input, name, cache) {
   if (cache.hasOwnProperty(name)) {
