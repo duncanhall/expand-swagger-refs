@@ -2,7 +2,7 @@
   "name": "expand-swagger-refs",
   "version": "2.0.0",
   "description": "Provides inline schema references for Swagger documents",
-  "main": "expand.js",
+  "main": "index.js",
   "directories": {
     "test": "test"
   },
@@ -12,12 +12,16 @@
   "bin": {
     "swagger-expand": "bin/expand-swagger-refs.js"
   },
+  "files": [
+    "bin",
+    "index.js"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/duncanhall/expand-swagger-refs.git"
   },
-  "author": "Duncan Hall <himself@duncanhall.net>",
-  "license": "ISC",
+  "author": "Duncan Hall <contact@duncanhall.net> (https://duncanhall.net)",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/duncanhall/expand-swagger-refs/issues"
   },
