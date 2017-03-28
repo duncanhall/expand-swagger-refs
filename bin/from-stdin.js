@@ -7,7 +7,6 @@ function expandstdin() {
   const stdin = process.stdin;
   const stdout = process.stdout;
   const data = [];
-
   stdin.resume();
   stdin.setEncoding('utf8');
   stdin.on('data', data.push.bind(data));
