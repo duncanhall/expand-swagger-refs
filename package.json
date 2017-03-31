@@ -1,6 +1,6 @@
 {
   "name": "expand-swagger-refs",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Provides inline schema references for Swagger documents",
   "main": "index.js",
   "directories": {
