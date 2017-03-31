@@ -11,7 +11,7 @@ function expandstdin() {
   stdin.setEncoding('utf8');
   stdin.on('data', data.push.bind(data));
   stdin.on('end', function () {
-    const parsedData = JSON.parse(data.join());
+    const parsedData = JSON.parse(data.join(''));
     const expandedData = expanded(parsedData);
     const output = JSON.stringify(expandedData, null);
     stdout.write(output);
